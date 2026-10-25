@@ -55,7 +55,7 @@ Follow the phases in order. Each links to the exact commands.
 | 4 | Tailscale remote access | [tailscale.md](references/tailscale.md) |
 | 5 | Non-admin agent user + auto-login | [agent-user.md](references/agent-user.md), [`scripts/create-agent-user.sh`](scripts/create-agent-user.sh) |
 | 6 | VLAN isolation (optional, UniFi examples) | [vlan-isolation.md](references/vlan-isolation.md) |
-| 7 | Jobs that survive reboots | [`templates/agent.plist`](templates/agent.plist) |
+| 7 | Jobs that survive reboots, and running agent CLIs over SSH | [`templates/agent.plist`](templates/agent.plist), [`scripts/agent-run`](scripts/agent-run) |
 | 8 | Hardening + cleanup | [hardening.md](references/hardening.md) |
 | | macOS updates and major upgrades over SSH | [macos-updates.md](references/macos-updates.md) |
 
@@ -95,6 +95,7 @@ ssh mini 'sudo rm /etc/sudoers.d/zz-setup'     # do not forget
 | `softwareupdate --download` ends with `Failed to authenticate` | Apple silicon: preparing the update needs the volume owner's password | Download is fine; install with `--user <admin> --stdinpass` |
 | Major upgrade queues "for post-logout install" and never restarts | It waits for the auto-logged-in console user to log out | `sudo launchctl bootout gui/<uid>` of the console user (macos-updates.md) |
 | `shutdown -r` after queueing comes back on the old version | A plain restart does not run a queued install | Do not kick it; re-run the install or use `startosinstall` |
+| Claude Code / Cursor CLI over SSH: `Your macOS login keychain is locked.` | Only the on-screen (auto-login) session has the keychain unlocked; each SSH session starts locked | [`scripts/agent-run`](scripts/agent-run) unlocks it over stdin, then runs the command |
 | VLAN rules do not apply to Tailscale traffic | WireGuard tunnels go end-to-end | Restrict it in the tailnet policy (tailscale.md) |
 
 ## Deliberate tradeoffs

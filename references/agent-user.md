@@ -66,5 +66,25 @@ On a dedicated, VLAN-isolated box the gain is smaller but still worth it for una
    ssh mini-agent 'whoami; sudo -n true; ls /Users/<admin>'         # expect: agent, sudo refused, permission denied
    ```
 
+## The login keychain is locked over SSH
+
+Agent CLIs (Claude Code, Cursor, others) store their login in the macOS **login keychain**.
+Auto-login unlocks it, but only in the **on-screen session**. Every SSH session is a separate
+security session where the keychain starts **locked**, so the CLIs fail
+(`Your macOS login keychain is locked.`) or want to log in again. Unlocking inside one SSH
+session does not carry over to the next.
+
+- **launchd jobs** (`templates/agent.plist`) run in the on-screen session: no action needed.
+- **Over SSH**, unlock at the start of the same session. `scripts/agent-run` (run on the admin's
+  main Mac) reads the agent password from the local Keychain, sends it over stdin, unlocks, then
+  runs the command:
+  ```bash
+  AGENT_HOST=mini-agent KEYCHAIN_ITEM=mini-agent scripts/agent-run 'cursor-agent status'
+  ```
+  With no arguments it opens an interactive shell and puts the password on the clipboard for
+  20 seconds, so you can paste it at the unlock prompt.
+- Do **not** store the password in a file on the Mac or turn the keychain into a no-lock
+  keychain to avoid this.
+
 `/etc/kcpassword` is only lightly obfuscated, not encrypted. Anyone with root on the box can
 recover the agent password. That is acceptable because the agent user is not an admin.

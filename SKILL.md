@@ -20,7 +20,7 @@ gotchas that break it. **Read the reference before running the phase.**
 | 4. Tailscale remote access | You + human signs in once | `references/tailscale.md` |
 | 5. Non-admin agent user + auto-login | You | `references/agent-user.md`, `scripts/create-agent-user.sh` |
 | 6. VLAN isolation (optional) | You, on the router | `references/vlan-isolation.md` |
-| 7. Services that survive reboot | You | `templates/agent.plist` |
+| 7. Services that survive reboot | You | `templates/agent.plist`; over SSH use `scripts/agent-run` (keychain) |
 | 8. Hardening + cleanup | You, ask first | `references/hardening.md` |
 | Any time: macOS updates | You + human types the owner password | `references/macos-updates.md` |
 

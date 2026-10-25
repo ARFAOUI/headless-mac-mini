@@ -1,0 +1,25 @@
+#!/bin/bash
+# Run a command as `agent` on the headless Mac with its login keychain unlocked.
+# The agent password comes from this Mac's Keychain and travels over stdin only.
+#
+#   agent-run 'cursor-agent --version'        # one command, non-interactive
+#   agent-run                                 # interactive login shell, keychain unlocked
+#   AGENT_HOST=mini-agent-ts agent-run …  # another ssh alias, e.g. over Tailscale
+#
+# Config: AGENT_HOST (ssh alias), KEYCHAIN_ITEM + AGENT_USER (local Keychain item holding the password)
+set -euo pipefail
+
+HOST="${AGENT_HOST:-mini-agent}"
+PW=$(security find-generic-password -s "${KEYCHAIN_ITEM:-mini-agent}" -a "${AGENT_USER:=agent}" -w)
+UNLOCK='security unlock-keychain -p "$P" ~/Library/Keychains/login.keychain-db; unset P'
+
+if [ $# -eq 0 ]; then
+  # interactive: stdin must stay the real terminal, so the password goes via the clipboard
+  printf '%s' "$PW" | pbcopy
+  ( sleep 20; [ "$(pbpaste)" = "$PW" ] && printf '' | pbcopy ) >/dev/null 2>&1 &
+  echo "$AGENT_USER password copied to the clipboard for 20 s: paste it at the prompt"
+  unset PW
+  exec ssh -t "$HOST" 'security unlock-keychain ~/Library/Keychains/login.keychain-db && exec zsh -l'
+fi
+
+printf '%s\n' "$PW" | ssh -o BatchMode=yes "$HOST" "read -r P; $UNLOCK; exec zsh -lc $(printf '%q' "$*")"

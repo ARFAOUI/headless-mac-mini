@@ -23,6 +23,17 @@ is one we actually hit.
         (from anywhere)
 ```
 
+## Status: v0.1 (complete for now)
+
+Done and tested end to end on one M4 Mac mini (October 2026, macOS 26.5 upgraded to 27.0.1):
+first boot checklist, key-only SSH aliases, toolchain, Tailscale with a restrictive tailnet policy,
+non-admin agent user with auto-login, VLAN isolation on UniFi, major macOS upgrade over SSH, and
+running agent CLIs (Claude Code, Codex, Cursor, Kimi) as the agent user.
+
+Not yet proven: `scripts/bootstrap.sh` and `scripts/create-agent-user.sh` automate the steps that
+were run by hand; they pass a syntax check but have not run on a fresh Mac. `scripts/audit.sh` and
+`scripts/agent-run` were run against the real machine. Issues and pull requests welcome.
+
 ## What you end up with
 
 - `ssh mini` from your laptop with a key, no prompts (so agents on your laptop can use it too)

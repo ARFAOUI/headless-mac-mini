@@ -57,6 +57,7 @@ Follow the phases in order. Each links to the exact commands.
 | 6 | VLAN isolation (optional, UniFi examples) | [vlan-isolation.md](references/vlan-isolation.md) |
 | 7 | Jobs that survive reboots | [`templates/agent.plist`](templates/agent.plist) |
 | 8 | Hardening + cleanup | [hardening.md](references/hardening.md) |
+| | macOS updates and major upgrades over SSH | [macos-updates.md](references/macos-updates.md) |
 
 ### Quick start
 
@@ -91,6 +92,9 @@ ssh mini 'sudo rm /etc/sudoers.d/zz-setup'     # do not forget
 | `mini.local` stops resolving after the VLAN move | mDNS does not cross VLANs | Use a DHCP reservation and the IP |
 | Other devices still reach the Mac after "isolating" it with rules | Same subnet traffic never hits the router | Its own VLAN, not just rules |
 | Allow rule for your laptop randomly stops working | Rotating private Wi-Fi address, new IP | Set Private Wi-Fi Address to Fixed + DHCP reservation |
+| `softwareupdate --download` ends with `Failed to authenticate` | Apple silicon: preparing the update needs the volume owner's password | Download is fine; install with `--user <admin> --stdinpass` |
+| Major upgrade queues "for post-logout install" and never restarts | No license acceptance on a screen nobody sees | Add `--agree-to-license` (see macos-updates.md) |
+| `shutdown -r` after queueing comes back on the old version | A plain restart does not run a queued install | Do not kick it; re-run the install or use `startosinstall` |
 | VLAN rules do not apply to Tailscale traffic | WireGuard tunnels go end-to-end | Restrict it in the tailnet policy (tailscale.md) |
 
 ## Deliberate tradeoffs

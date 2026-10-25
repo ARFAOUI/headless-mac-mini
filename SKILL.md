@@ -22,6 +22,7 @@ gotchas that break it. **Read the reference before running the phase.**
 | 6. VLAN isolation (optional) | You, on the router | `references/vlan-isolation.md` |
 | 7. Services that survive reboot | You | `templates/agent.plist` |
 | 8. Hardening + cleanup | You, ask first | `references/hardening.md` |
+| Any time: macOS updates | You + human types the owner password | `references/macos-updates.md` |
 
 ## Rules
 
@@ -35,6 +36,8 @@ gotchas that break it. **Read the reference before running the phase.**
   **always delete it at the end** (phase 8). Track that you created it.
 - **Verify, do not assume.** After every change, open a *new* SSH connection and check that you
   still get in. After phase 5, reboot once and confirm the console user and Tailscale come back.
+- **Major macOS upgrades over SSH**: never "kick" a queued install with `shutdown -r`, always
+  pass `--agree-to-license`, and read `references/macos-updates.md` first.
 - **Never put real IPs, MACs, emails or passwords in anything you publish.** Store generated
   passwords in the admin's macOS Keychain (`security add-generic-password`), never in files.
 

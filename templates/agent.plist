@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  A user-level LaunchAgent that keeps a job running across reboots.
+  Runs after the agent user is auto-logged in.
+
+  Install (as the agent user):
+    cp agent.plist ~/Library/LaunchAgents/com.example.my-agent.plist
+    # edit Label, ProgramArguments, WorkingDirectory, log paths
+    launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.example.my-agent.plist
+  Inspect / restart / remove:
+    launchctl print gui/$(id -u)/com.example.my-agent
+    launchctl kickstart -k gui/$(id -u)/com.example.my-agent
+    launchctl bootout gui/$(id -u)/com.example.my-agent
+
+  For a scheduled job instead of an always-on one: drop KeepAlive and add StartCalendarInterval
+  (e.g. <key>StartCalendarInterval</key><dict><key>Hour</key><integer>7</integer></dict>).
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.example.my-agent</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/zsh</string>
+    <string>-lc</string>
+    <!-- login shell so ~/.zprofile puts brew and ~/.local/bin on PATH -->
+    <string>exec ./run-agent.sh</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/agent/work/my-agent</string>
+
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- restart if it exits, but not in a tight loop -->
+  <key>KeepAlive</key>
+  <dict>
+    <key>SuccessfulExit</key>
+    <false/>
+  </dict>
+  <key>ThrottleInterval</key>
+  <integer>60</integer>
+
+  <key>StandardOutPath</key>
+  <string>/Users/agent/Library/Logs/my-agent.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/agent/Library/Logs/my-agent.err.log</string>
+</dict>
+</plist>

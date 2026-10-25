@@ -47,7 +47,7 @@ ssh mini 'grep "Post Logout" /var/log/install.log | tail -1'   # installer progr
 Seconds later the log shows `IASPPhase: 'Software Update Post Logout'` and the Mac prepares,
 restarts and installs on its own. Logging out kills that user's apps, so stop agent jobs first.
 
-_Tested 2026-10-25 (26.5 to 27.0.1, M4 Mac mini): confirmed up to the installer starting; the finished upgrade is still being verified._
+_Tested 2026-10-25, 26.5 to 27.0.1 on an M4 Mac mini: after the logout the Mac was offline for about 4 minutes, came back on 27.0.1 by itself and auto-logged in the agent user. FileVault off, auto-login, `/etc/kcpassword`, Tailscale, Homebrew and the old Command Line Tools all survived._
 
 ## What went wrong, and why
 
@@ -84,8 +84,10 @@ If it answers on the old version with a short uptime, the install did not run: r
 ## After a major upgrade
 
 1. Run `scripts/audit.sh`.
-2. **Command Line Tools** often disappear: reinstall with the headless method in `bootstrap.md`.
-3. `brew update && brew upgrade`, then check Tailscale is connected (`tailscale status`).
+2. **Command Line Tools**: they survived 26 to 27 for us, but a matching new version showed up in
+   `softwareupdate -l` (`Command Line Tools for Xcode 27.0`). Install it with
+   `sudo softwareupdate -i "<label>"`, or reinstall with the headless method in `bootstrap.md` if they are gone.
+3. `brew update && brew upgrade` and `brew doctor`, then check Tailscale is connected (`tailscale status`).
 4. Confirm auto-login still points at the agent user and `/etc/kcpassword` still exists.
 5. Check for a "finish setting up" screen with Screen Sharing if the console user looks stuck.
 6. Turn automatic updates back on.

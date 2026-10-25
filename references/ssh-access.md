@@ -55,6 +55,17 @@ Host mini
     IdentitiesOnly yes
 ```
 
+Add connection sharing, so agents that run many commands reuse one TCP connection. That is
+faster, and it keeps router intrusion prevention from mistaking you for an SSH scanner:
+
+```
+    ControlMaster auto
+    ControlPath ~/.ssh/cm/%r@%h:%p
+    ControlPersist 10m
+```
+
+(`mkdir -m 700 ~/.ssh/cm` once.)
+
 Verify non-interactively, the way an agent will use it:
 
 ```bash

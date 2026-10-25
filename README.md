@@ -96,6 +96,9 @@ ssh mini 'sudo rm /etc/sudoers.d/zz-setup'     # do not forget
 | Major upgrade queues "for post-logout install" and never restarts | It waits for the auto-logged-in console user to log out | `sudo launchctl bootout gui/<uid>` of the console user (macos-updates.md) |
 | `shutdown -r` after queueing comes back on the old version | A plain restart does not run a queued install | Do not kick it; re-run the install or use `startosinstall` |
 | Claude Code / Cursor CLI over SSH: `Your macOS login keychain is locked.` | Only the on-screen (auto-login) session has the keychain unlocked; each SSH session starts locked | [`scripts/agent-run`](scripts/agent-run) unlocks it over stdin, then runs the command |
+| Isolated Mac can still open the router's login page | Traffic to the gateway itself uses LAN_LOCAL, not LAN_IN | LAN_LOCAL rules: DNS + DHCP only (vlan-isolation.md) |
+| SSH to the new VLAN IP times out, ping works, right after moving the port | Mac still on Wi-Fi too; default route stays on Wi-Fi, replies take the wrong path | Turn Wi-Fi off, wait a minute |
+| SSH suddenly times out from your machine, Screen Sharing still works | Router IPS took your many SSH connections for a scan | SSH `ControlMaster`, no probe loops; wait a few minutes |
 | VLAN rules do not apply to Tailscale traffic | WireGuard tunnels go end-to-end | Restrict it in the tailnet policy (tailscale.md) |
 
 ## Deliberate tradeoffs

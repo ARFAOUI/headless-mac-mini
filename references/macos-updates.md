@@ -30,16 +30,34 @@ echoing and passes it on stdin:
 ssh -t mini 'read -s "P?password: "; echo; printf "%s" "$P" | sudo softwareupdate -i "<label>" --agree-to-license -R --user <admin> --stdinpass --verbose'
 ```
 
+## The install waits for the console user to log out
+
+On a machine with **auto-login**, the command above authenticates and then only **queues** the
+upgrade "for post-logout install". It does not restart, even with `-R`. The install starts when
+the logged-in console user logs out, and on a headless box nobody ever does.
+
+Trigger it by ending the console user's session (as admin, after the queue was committed):
+
+```bash
+ssh mini 'grep "Successfully committed stash" /var/log/install.log | tail -1'   # confirm it is queued
+ssh mini 'uid=$(id -u $(stat -f %Su /dev/console)); sudo launchctl bootout gui/$uid'
+ssh mini 'grep "Post Logout" /var/log/install.log | tail -1'   # installer progress phase started
+```
+
+Seconds later the log shows `IASPPhase: 'Software Update Post Logout'` and the Mac prepares,
+restarts and installs on its own. Logging out kills that user's apps, so stop agent jobs first.
+
+_Tested 2026-10-25 (26.5 to 27.0.1, M4 Mac mini): confirmed up to the installer starting; the finished upgrade is still being verified._
+
 ## What went wrong, and why
 
 | Step | What happened | Lesson |
 |---|---|---|
 | `sudo softwareupdate --download "<label>"` | Downloaded 100%, then `Failed to authenticate` | Downloading in the background works, but preparing the update needs owner auth. Fine to pre-download; it is not staged yet. |
-| `softwareupdate -i "<label>" -R --user <admin> --stdinpass` **without** `--agree-to-license` | Authenticated, logged `Queueing updates for post-logout install ... Successfully committed stash`, then **never restarted** | Without `--agree-to-license`, a major upgrade can wait for someone to accept the license on screen. With the agent user logged in at the console and no screen, nothing happens. |
+| `softwareupdate -i "<label>" -R --user <admin> --stdinpass` | Authenticated, logged `Queueing updates for post-logout install ... Successfully committed stash`, then **never restarted** | The install is waiting for the console user (auto-login) to log out. |
 | `sudo shutdown -r now` to "kick" the queued install | Back in 15 seconds on the old version; the queued install was gone | A plain restart does not run a queued post-logout install. Do not do this. |
-
-Next attempt is the command above, with `--agree-to-license` and `--verbose`. **Status: not yet
-confirmed** to fix the problem; update this page with the result.
+| Same command again, adding `--agree-to-license` | Exactly the same: queued, no restart | Not the cause. Keep the flag (it avoids a license prompt), but it does not trigger the install. |
+| `sudo launchctl bootout gui/<console-uid>` after queueing | Installer started its "Software Update Post Logout" phase within seconds | **This is the fix.** See the section above. |
 
 ## Reliable fallback: the full installer
 

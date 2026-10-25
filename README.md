@@ -93,7 +93,7 @@ ssh mini 'sudo rm /etc/sudoers.d/zz-setup'     # do not forget
 | Other devices still reach the Mac after "isolating" it with rules | Same subnet traffic never hits the router | Its own VLAN, not just rules |
 | Allow rule for your laptop randomly stops working | Rotating private Wi-Fi address, new IP | Set Private Wi-Fi Address to Fixed + DHCP reservation |
 | `softwareupdate --download` ends with `Failed to authenticate` | Apple silicon: preparing the update needs the volume owner's password | Download is fine; install with `--user <admin> --stdinpass` |
-| Major upgrade queues "for post-logout install" and never restarts | No license acceptance on a screen nobody sees | Add `--agree-to-license` (see macos-updates.md) |
+| Major upgrade queues "for post-logout install" and never restarts | It waits for the auto-logged-in console user to log out | `sudo launchctl bootout gui/<uid>` of the console user (macos-updates.md) |
 | `shutdown -r` after queueing comes back on the old version | A plain restart does not run a queued install | Do not kick it; re-run the install or use `startosinstall` |
 | VLAN rules do not apply to Tailscale traffic | WireGuard tunnels go end-to-end | Restrict it in the tailnet policy (tailscale.md) |
 

@@ -36,8 +36,9 @@ gotchas that break it. **Read the reference before running the phase.**
   **always delete it at the end** (phase 8). Track that you created it.
 - **Verify, do not assume.** After every change, open a *new* SSH connection and check that you
   still get in. After phase 5, reboot once and confirm the console user and Tailscale come back.
-- **Major macOS upgrades over SSH**: never "kick" a queued install with `shutdown -r`, always
-  pass `--agree-to-license`, and read `references/macos-updates.md` first.
+- **Major macOS upgrades over SSH**: with auto-login, `softwareupdate -i` only queues the
+  upgrade until the console user logs out. Trigger it with `launchctl bootout gui/<uid>`, never
+  with `shutdown -r` (that drops the queue). Read `references/macos-updates.md` first.
 - **Never put real IPs, MACs, emails or passwords in anything you publish.** Store generated
   passwords in the admin's macOS Keychain (`security add-generic-password`), never in files.
 

@@ -64,6 +64,20 @@ echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zprofile
 
 This installs per user into `~/.local/bin`. Install it again as the agent user in phase 5.
 
+## Full Xcode without an Apple ID download
+
+If another Mac already has the right Xcode, copy it instead of downloading ~10 GB with an Apple ID.
+`/Applications` is writable by the admin group, so no sudo is needed for the copy itself, and
+`ditto` keeps the code signature intact:
+
+```bash
+ditto -c /Applications/Xcode.app - | ssh mini 'mkdir -p /Applications/Xcode.app && ditto -x - /Applications/Xcode.app && codesign --verify --deep --strict /Applications/Xcode.app && echo ok'
+ssh -t mini 'sudo xcode-select -s /Applications/Xcode.app && sudo xcodebuild -license accept && sudo xcodebuild -runFirstLaunch'
+```
+
+Signing for a device still needs an Apple ID in Xcode > Settings > Accounts **as the user that
+builds** (the agent user), which means one Screen Sharing session (see agent-user.md).
+
 ## Containers (only if needed)
 
 OrbStack (`brew install --cask orbstack`) is lighter than Docker Desktop. Both need a GUI login

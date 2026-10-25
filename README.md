@@ -99,6 +99,8 @@ ssh mini 'sudo rm /etc/sudoers.d/zz-setup'     # do not forget
 | Isolated Mac can still open the router's login page | Traffic to the gateway itself uses LAN_LOCAL, not LAN_IN | LAN_LOCAL rules: DNS + DHCP only (vlan-isolation.md) |
 | SSH to the new VLAN IP times out, ping works, right after moving the port | Mac still on Wi-Fi too; default route stays on Wi-Fi, replies take the wrong path | Turn Wi-Fi off, wait a minute |
 | SSH suddenly times out from your machine, Screen Sharing still works | Router IPS took your many SSH connections for a scan | SSH `ControlMaster`, no probe loops; wait a few minutes |
+| Agent user cannot log in over Screen Sharing | Screen Sharing is admin-only by default, like SSH | `dseditgroup -o edit -a <user> -t user com.apple.access_screensharing` |
+| Pasted password rejected at a login field | `security -w` output ends with a newline; the lock screen refuses paste anyway | `printf '%s'` into pbcopy; type it at lock screens |
 | VLAN rules do not apply to Tailscale traffic | WireGuard tunnels go end-to-end | Restrict it in the tailnet policy (tailscale.md) |
 
 ## Deliberate tradeoffs

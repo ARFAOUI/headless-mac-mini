@@ -40,6 +40,14 @@ On a dedicated, VLAN-isolated box the gain is smaller but still worth it for una
    ```bash
    sudo dseditgroup -o edit -a agent -t user com.apple.access_ssh
    ```
+   Screen Sharing has the same admin-only default (`com.apple.access_screensharing`). If the
+   agent user needs the GUI (signing into Xcode, granting permissions), add it too:
+   ```bash
+   sudo dseditgroup -o edit -a agent -t user com.apple.access_screensharing
+   ```
+   Typing its password at the remote lock screen: the macOS lock screen **refuses paste**, and it
+   may use a different keyboard layout than your Mac (watch Y/Z). Also, `security ... -w | pbcopy`
+   copies a trailing newline; use `printf '%s' "$(security ... -w)" | pbcopy` for login fields.
 5. **Give it its own key** (generate on the main Mac, install into `/Users/agent/.ssh/authorized_keys`,
    owner `agent:staff`, modes 700/600) and an alias `mini-agent` in `~/.ssh/config`.
 6. **Auto-login as agent.**

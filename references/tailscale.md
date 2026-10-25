@@ -36,13 +36,38 @@ door. Lock it in the tailnet policy (admin console > Access controls). Example:
 ```jsonc
 {
   "tagOwners": { "tag:agent-host": ["autogroup:admin"] },
-  "acls": [
-    // only the admin's own devices may reach the agent host, and only SSH + Screen Sharing
-    { "action": "accept", "src": ["autogroup:member"], "dst": ["tag:agent-host:22,5900"] }
-    // no rule lets tag:agent-host start connections to anything, so it cannot reach other devices
-  ]
+  "grants": [
+    // your own devices keep full access to each other (replaces the default allow-all rule)
+    {"src": ["autogroup:member"], "dst": ["autogroup:self"], "ip": ["*"]},
+    // your devices may reach the agent host on SSH and Screen Sharing only
+    {"src": ["autogroup:member"], "dst": ["tag:agent-host"], "ip": ["tcp:22", "tcp:5900"]},
+    // no rule has tag:agent-host as a source, so it cannot start connections to anything
+  ],
+  // keep the default "ssh" section if you use Tailscale SSH on your own devices
 }
 ```
 
-Then tag the Mac: `sudo tailscale up --advertise-tags=tag:agent-host`. Also make sure no device
+Delete or comment out the default `{"src": ["*"], "dst": ["*"], "ip": ["*"]}` rule, or the
+restriction does nothing. `autogroup:self` (not `autogroup:member`) is the valid destination for
+"my own devices".
+
+**The policy only applies once the Mac carries the tag.** Until then it is one of "your own
+devices" and keeps full access. Tag it either way:
+- Admin console > Machines > the Mac's menu > **Edit ACL tags** > `tag:agent-host`. No sudo
+  needed on the Mac.
+- Or on the Mac: `sudo tailscale up --hostname=mini --advertise-tags=tag:agent-host`.
+
+Tagging moves ownership from your user to the tag and **turns off key expiry**, which is what you
+want for a machine nobody logs into.
+
+Verify from both sides (pick a port that is open on your laptop, e.g. one `lsof -iTCP -sTCP:LISTEN`
+shows on `*`):
+
+```bash
+ssh mini-ts 'echo ok'                                  # laptop -> Mac: works
+ssh mini-ts 'nc -z -G 5 <laptop-100.x-ip> <port>'      # Mac -> laptop: must fail
+nc -z <laptop-100.x-ip> <port>                         # control: the port is open
+```
+
+Also make sure no device
 on the tailnet is a **subnet router** for your home LAN, or the Mac could reach the LAN through it.
